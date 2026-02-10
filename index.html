@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Home Language UpSet Plot — DHH Children, Fall 2025</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f0fdfa; }
+  .upset-tooltip {
+    position: fixed; pointer-events: none; z-index: 1000;
+    background: rgba(15, 23, 42, 0.95); color: #fff; border-radius: 8px;
+    padding: 10px 14px; font-size: 13px; line-height: 1.5;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25); max-width: 320px;
+    backdrop-filter: blur(4px); border: 1px solid rgba(94,234,212,0.3);
+  }
+  .upset-tooltip .tt-label { color: #5eead4; font-weight: 600; font-size: 14px; }
+  .upset-tooltip .tt-count { color: #99f6e4; font-weight: 700; font-size: 16px; }
+  .bar-hover { cursor: pointer; }
+  .bar-hover:hover { filter: brightness(1.15); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+// ═══════════════════════════════════════════════════════════════════════════
+// EMBEDDED DATA (from home_language_upset_data.json)
+// ═══════════════════════════════════════════════════════════════════════════
+const DATA = {
+  "totalRecords": 628,
+  "recordsWithLanguage": 566,
+  "missingLanguage": 62,
+  "uniqueLanguages": 9,
+  "uniqueCombinations": 37,
+  "languages": ["English","Spanish","ASL","Home signs/gestures","Other","Vietnamese","Cantonese","Tagalog/Pilipino","Hmong"],
+  "setSizes": [
+    {"language":"English","count":371},{"language":"Spanish","count":250},
+    {"language":"ASL","count":121},{"language":"Home signs/gestures","count":74},
+    {"language":"Other","count":66},{"language":"Vietnamese","count":13},
+    {"language":"Cantonese","count":13},{"language":"Tagalog/Pilipino","count":4},
+    {"language":"Hmong","count":2}
+  ],
+  "intersections": [
+    {"languages":["English"],"count":152,"degree":1},
+    {"languages":["Spanish"],"count":96,"degree":1},
+    {"languages":["English","Spanish"],"count":70,"degree":2},
+    {"languages":["English","ASL"],"count":42,"degree":2},
+    {"languages":["Other"],"count":30,"degree":1},
+    {"languages":["ASL"],"count":19,"degree":1},
+    {"languages":["English","Spanish","Home signs/gestures"],"count":18,"degree":3},
+    {"languages":["English","Spanish","ASL"],"count":16,"degree":3},
+    {"languages":["English","Other"],"count":13,"degree":2},
+    {"languages":["Spanish","Other"],"count":12,"degree":2},
+    {"languages":["English","ASL","Home signs/gestures"],"count":12,"degree":3},
+    {"languages":["English","Spanish","ASL","Home signs/gestures"],"count":11,"degree":4},
+    {"languages":["English","Home signs/gestures"],"count":10,"degree":2},
+    {"languages":["Spanish","Home signs/gestures"],"count":10,"degree":2},
+    {"languages":["Spanish","ASL"],"count":9,"degree":2},
+    {"languages":["English","Vietnamese"],"count":8,"degree":2},
+    {"languages":["English","Cantonese"],"count":5,"degree":2},
+    {"languages":["Cantonese"],"count":5,"degree":1},
+    {"languages":["Spanish","ASL","Other"],"count":3,"degree":3},
+    {"languages":["Vietnamese"],"count":3,"degree":1},
+    {"languages":["English","Tagalog/Pilipino"],"count":2,"degree":2},
+    {"languages":["Spanish","ASL","Home signs/gestures"],"count":2,"degree":3},
+    {"languages":["English","Home signs/gestures","Other"],"count":2,"degree":3},
+    {"languages":["Home signs/gestures"],"count":2,"degree":1},
+    {"languages":["English","Spanish","Other"],"count":2,"degree":3},
+    {"languages":["English","ASL","Tagalog/Pilipino"],"count":1,"degree":3},
+    {"languages":["Spanish","Home signs/gestures","Other"],"count":1,"degree":3},
+    {"languages":["ASL","Home signs/gestures"],"count":1,"degree":2},
+    {"languages":["English","Home signs/gestures","Cantonese"],"count":1,"degree":3},
+    {"languages":["ASL","Other"],"count":1,"degree":2},
+    {"languages":["English","ASL","Other"],"count":1,"degree":3},
+    {"languages":["English","ASL","Home signs/gestures","Vietnamese"],"count":1,"degree":4},
+    {"languages":["Hmong"],"count":1,"degree":1},
+    {"languages":["English","Other","Cantonese"],"count":1,"degree":3},
+    {"languages":["English","Home signs/gestures","Cantonese","Vietnamese"],"count":1,"degree":4},
+    {"languages":["English","ASL","Home signs/gestures","Hmong"],"count":1,"degree":4},
+    {"languages":["English","ASL","Home signs/gestures","Tagalog/Pilipino"],"count":1,"degree":4}
+  ],
+  "otherLanguagesBreakout": [
+    {"language":"Unspecified Other","count":10},{"language":"Mixteco","count":9},
+    {"language":"Mandarin","count":7},{"language":"Russian","count":5},
+    {"language":"Punjabi","count":4},{"language":"Farsi","count":3},
+    {"language":"Mam","count":3},{"language":"Korean","count":2},
+    {"language":"Arabic","count":2},{"language":"Haitian Creole","count":2},
+    {"language":"Hebrew","count":2},{"language":"Japanese","count":2},
+    {"language":"Triqui","count":1},{"language":"Khazak","count":1},
+    {"language":"Chinese","count":1},{"language":"Creole","count":1},
+    {"language":"Tamil","count":1},{"language":"Otomian languages (Mixteco)","count":1},
+    {"language":"Hindi","count":1},{"language":"Asian Indian","count":1},
+    {"language":"Zapateco","count":1},{"language":"Portuguese","count":1},
+    {"language":"Portugese","count":1},{"language":"Deaf/Blind","count":1},
+    {"language":"Ukrainian","count":1},{"language":"Czech/Slovak","count":1},
+    {"language":"Armenian","count":1}
+  ]
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COLOR PALETTE — teal/blue-green gradient by degree
+// ═══════════════════════════════════════════════════════════════════════════
+const DEGREE_COLORS = {
+  1: '#99f6e4', // teal-200
+  2: '#5eead4', // teal-300
+  3: '#2dd4bf', // teal-400
+  4: '#0d9488', // teal-600
+  5: '#115e59', // teal-800
+};
+const getDegreeColor = (d) => DEGREE_COLORS[Math.min(d, 5)] || DEGREE_COLORS[5];
+const SET_BAR_COLOR = '#14b8a6'; // teal-500
+const DOT_ACTIVE = '#0f766e';   // teal-700
+const DOT_INACTIVE = '#e2e8f0'; // slate-200
+const LINE_COLOR = '#0f766e';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════════════════════════════════
+function App() {
+  const [sortMode, setSortMode] = React.useState('size'); // 'size' | 'degree'
+  const [hoveredIntersection, setHoveredIntersection] = React.useState(null);
+  const [hoveredSet, setHoveredSet] = React.useState(null);
+  const [tooltip, setTooltip] = React.useState(null);
+  const [showInfo, setShowInfo] = React.useState(false);
+
+  // Sort intersections
+  const sortedIntersections = React.useMemo(() => {
+    const arr = [...DATA.intersections];
+    if (sortMode === 'size') {
+      arr.sort((a, b) => b.count - a.count);
+    } else {
+      arr.sort((a, b) => a.degree - b.degree || b.count - a.count);
+    }
+    return arr;
+  }, [sortMode]);
+
+  const languages = DATA.languages; // already sorted by set size desc
+  const maxSetSize = DATA.setSizes[0].count;
+  const maxIntSize = Math.max(...sortedIntersections.map(i => i.count));
+
+  // ── Dimensions ────────────────────────────────────────────────────────
+  const LABEL_W = 160;
+  const SET_BAR_W = 180;
+  const GAP = 12;
+  const COL_W = 26;
+  const ROW_H = 28;
+  const BAR_AREA_H = 160;
+  const DOT_R = 8;
+  const NUM_COLS = sortedIntersections.length;
+  const NUM_ROWS = languages.length;
+  const MATRIX_W = NUM_COLS * COL_W;
+  const MATRIX_H = NUM_ROWS * ROW_H;
+  const TOTAL_W = LABEL_W + SET_BAR_W + GAP + MATRIX_W + 20;
+  const TOTAL_H = BAR_AREA_H + GAP + MATRIX_H + 10;
+
+  // ── Mouse handlers ───────────────────────────────────────────────────
+  const handleIntHover = (idx, e) => {
+    const ix = sortedIntersections[idx];
+    setHoveredIntersection(idx);
+    setTooltip({
+      x: e.clientX, y: e.clientY,
+      label: ix.languages.join(' + '),
+      count: ix.count,
+      degree: ix.degree,
+      type: 'intersection'
+    });
+  };
+  const handleSetHover = (lang, e) => {
+    const s = DATA.setSizes.find(s => s.language === lang);
+    setHoveredSet(lang);
+    setTooltip({
+      x: e.clientX, y: e.clientY,
+      label: lang,
+      count: s.count,
+      type: 'set'
+    });
+  };
+  const handleMouseMove = (e) => {
+    if (tooltip) setTooltip(t => t ? {...t, x: e.clientX, y: e.clientY} : null);
+  };
+  const clearHover = () => {
+    setHoveredIntersection(null);
+    setHoveredSet(null);
+    setTooltip(null);
+  };
+
+  // Is a language highlighted?
+  const isLangHighlighted = (lang) => {
+    if (hoveredSet === lang) return true;
+    if (hoveredIntersection !== null) {
+      return sortedIntersections[hoveredIntersection].languages.includes(lang);
+    }
+    return false;
+  };
+
+  return (
+    <div className="min-h-screen p-4 md:p-8" onMouseMove={handleMouseMove}>
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <div className="max-w-[1400px] mx-auto">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-teal-900 mb-1">
+            Home Language Combinations — DHH Children
+          </h1>
+          <p className="text-teal-700 text-sm">
+            Language Milestones Assessment, Fall 2025 Statewide Collection&ensp;·&ensp;
+            <span className="font-semibold">{DATA.recordsWithLanguage}</span> children with language data
+            ({DATA.missingLanguage} missing)&ensp;·&ensp;
+            <span className="font-semibold">{DATA.uniqueCombinations}</span> unique combinations across&ensp;
+            <span className="font-semibold">{DATA.uniqueLanguages}</span> language categories
+          </p>
+        </div>
+
+        {/* ── Controls ───────────────────────────────────────────────── */}
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <div className="flex items-center bg-white rounded-lg shadow-sm border border-teal-200 overflow-hidden">
+            <span className="px-3 py-2 text-xs font-semibold text-teal-700 bg-teal-50 border-r border-teal-200">
+              Sort intersections by
+            </span>
+            <button
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                sortMode === 'size' ? 'bg-teal-600 text-white' : 'bg-white text-teal-700 hover:bg-teal-50'
+              }`}
+              onClick={() => setSortMode('size')}
+            >
+              Size ↓
+            </button>
+            <button
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                sortMode === 'degree' ? 'bg-teal-600 text-white' : 'bg-white text-teal-700 hover:bg-teal-50'
+              }`}
+              onClick={() => setSortMode('degree')}
+            >
+              Degree ↑
+            </button>
+          </div>
+
+          <button
+            className="flex items-center gap-1 px-3 py-2 text-xs font-medium text-teal-700 bg-white border border-teal-200 rounded-lg shadow-sm hover:bg-teal-50 transition-colors"
+            onClick={() => setShowInfo(!showInfo)}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            How to read this chart
+          </button>
+
+          {/* Legend */}
+          <div className="flex items-center gap-2 ml-auto text-xs text-teal-700">
+            <span className="font-medium">Complexity:</span>
+            {[1,2,3,4].map(d => (
+              <span key={d} className="flex items-center gap-1">
+                <span className="inline-block w-4 h-4 rounded" style={{background: getDegreeColor(d)}}></span>
+                {d === 4 ? '4+' : d}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Info panel ─────────────────────────────────────────────── */}
+        {showInfo && (
+          <div className="mb-4 p-4 bg-teal-50 border border-teal-200 rounded-xl text-sm text-teal-800 leading-relaxed">
+            <p className="font-semibold mb-2">📖 How to Read an UpSet Plot</p>
+            <p className="mb-2">
+              This chart shows <strong>all combinations</strong> of home languages reported for DHH children.
+              Unlike a Venn diagram, it can clearly display many overlapping sets.
+            </p>
+            <ul className="list-disc ml-5 space-y-1">
+              <li><strong>Horizontal bars (left)</strong> — Total count of children who use each language,
+                  across <em>all</em> combinations. For example, "English = 371" means 371 children have
+                  English as one of their home languages (alone or combined with others).</li>
+              <li><strong>Vertical bars (top)</strong> — Count of children with that <em>exact</em> combination.
+                  Each column represents one specific set of languages.</li>
+              <li><strong>Dot matrix (below)</strong> — Filled circles show which languages are in each combination.
+                  Lines connect multi-language combinations. A single dot = monolingual.</li>
+              <li><strong>Colors</strong> — Lighter teal = monolingual; progressively darker =
+                  more languages in the combination.</li>
+              <li><strong>Hover</strong> over any bar or dot column to see details.</li>
+            </ul>
+          </div>
+        )}
+
+        {/* ── Main Chart + Side Panel ─────────────────────────────────── */}
+        <div className="flex gap-6 items-start">
+          {/* Main UpSet chart */}
+          <div className="bg-white rounded-2xl shadow-lg border border-teal-100 p-5 overflow-x-auto flex-1">
+            <svg
+              width={TOTAL_W}
+              height={TOTAL_H}
+              viewBox={`0 0 ${TOTAL_W} ${TOTAL_H}`}
+              className="block"
+              onMouseLeave={clearHover}
+            >
+              {/* ── INTERSECTION BARS (top) ───────────────────────────── */}
+              <g transform={`translate(${LABEL_W + SET_BAR_W + GAP}, 0)`}>
+                {/* Y-axis for bars */}
+                <line x1={-2} y1={BAR_AREA_H} x2={MATRIX_W} y2={BAR_AREA_H}
+                  stroke="#94a3b8" strokeWidth={1} />
+                {/* Grid lines */}
+                {[0.25, 0.5, 0.75, 1.0].map(frac => {
+                  const yy = BAR_AREA_H - (BAR_AREA_H - 20) * frac;
+                  const val = Math.round(maxIntSize * frac);
+                  return (
+                    <g key={frac}>
+                      <line x1={-2} y1={yy} x2={MATRIX_W} y2={yy}
+                        stroke="#e2e8f0" strokeWidth={0.5} strokeDasharray="3,3" />
+                      <text x={-6} y={yy + 4} textAnchor="end"
+                        className="text-[9px]" fill="#94a3b8">{val}</text>
+                    </g>
+                  );
+                })}
+                <text x={-6} y={BAR_AREA_H + 4} textAnchor="end"
+                  className="text-[9px]" fill="#94a3b8">0</text>
+
+                {/* Bars */}
+                {sortedIntersections.map((ix, ci) => {
+                  const barH = (ix.count / maxIntSize) * (BAR_AREA_H - 20);
+                  const x = ci * COL_W + (COL_W - 18) / 2;
+                  const highlighted = hoveredIntersection === ci;
+                  const dimmed = hoveredIntersection !== null && !highlighted
+                    && hoveredSet === null;
+                  const setDimmed = hoveredSet !== null && !ix.languages.includes(hoveredSet);
+                  const opacity = (dimmed || setDimmed) ? 0.2 : 1;
+
+                  return (
+                    <g key={ci} className="bar-hover"
+                      onMouseEnter={(e) => handleIntHover(ci, e)}
+                      onMouseLeave={clearHover}
+                    >
+                      <rect
+                        x={x} y={BAR_AREA_H - barH} width={18} height={barH}
+                        rx={3}
+                        fill={getDegreeColor(ix.degree)}
+                        opacity={opacity}
+                        stroke={highlighted ? '#0f766e' : 'none'}
+                        strokeWidth={highlighted ? 2 : 0}
+                      />
+                      {/* Count label on top of bar */}
+                      {ix.count >= (maxIntSize * 0.03) && (
+                        <text
+                          x={x + 9} y={BAR_AREA_H - barH - 4}
+                          textAnchor="middle" fill="#0f766e"
+                          className="text-[9px] font-semibold"
+                          opacity={opacity}
+                        >
+                          {ix.count}
+                        </text>
+                      )}
+                    </g>
+                  );
+                })}
+
+                {/* Axis label */}
+                <text x={MATRIX_W / 2} y={-2} textAnchor="middle"
+                  fill="#0f766e" className="text-[11px] font-semibold">
+                  Intersection Size (exact combination count)
+                </text>
+              </g>
+
+              {/* ── SET SIZE BARS (left) ──────────────────────────────── */}
+              <g transform={`translate(0, ${BAR_AREA_H + GAP})`}>
+                {/* Labels */}
+                {languages.map((lang, ri) => {
+                  const highlighted = isLangHighlighted(lang);
+                  const dimmed = (hoveredIntersection !== null || hoveredSet !== null) && !highlighted;
+                  return (
+                    <text
+                      key={lang}
+                      x={LABEL_W - 8}
+                      y={ri * ROW_H + ROW_H / 2 + 4}
+                      textAnchor="end"
+                      fill={highlighted ? '#0f766e' : dimmed ? '#cbd5e1' : '#334155'}
+                      className="text-[12px] font-medium"
+                      style={{transition: 'fill 0.15s'}}
+                    >
+                      {lang}
+                    </text>
+                  );
+                })}
+
+                {/* Bars */}
+                {DATA.setSizes.map((s, ri) => {
+                  const barW = (s.count / maxSetSize) * (SET_BAR_W - 10);
+                  const highlighted = isLangHighlighted(s.language);
+                  const dimmed = (hoveredIntersection !== null || hoveredSet !== null) && !highlighted;
+
+                  return (
+                    <g key={s.language} className="bar-hover"
+                      onMouseEnter={(e) => handleSetHover(s.language, e)}
+                      onMouseLeave={clearHover}
+                    >
+                      {/* Background row stripe */}
+                      <rect
+                        x={LABEL_W} y={ri * ROW_H}
+                        width={SET_BAR_W} height={ROW_H}
+                        fill={ri % 2 === 0 ? '#f8fafc' : '#ffffff'}
+                        opacity={dimmed ? 0.3 : 1}
+                      />
+                      {/* Bar (drawn right-to-left from right edge) */}
+                      <rect
+                        x={LABEL_W + SET_BAR_W - barW}
+                        y={ri * ROW_H + (ROW_H - 16) / 2}
+                        width={barW} height={16} rx={3}
+                        fill={highlighted ? '#0d9488' : SET_BAR_COLOR}
+                        opacity={dimmed ? 0.2 : 1}
+                        stroke={highlighted ? '#0f766e' : 'none'}
+                        strokeWidth={highlighted ? 1.5 : 0}
+                        style={{transition: 'opacity 0.15s'}}
+                      />
+                      {/* Count label */}
+                      <text
+                        x={LABEL_W + SET_BAR_W - barW - 5}
+                        y={ri * ROW_H + ROW_H / 2 + 4}
+                        textAnchor="end"
+                        fill={dimmed ? '#cbd5e1' : '#0f766e'}
+                        className="text-[10px] font-semibold"
+                      >
+                        {s.count}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* Axis label */}
+                <text
+                  x={LABEL_W + SET_BAR_W / 2}
+                  y={MATRIX_H + 18}
+                  textAnchor="middle"
+                  fill="#0f766e"
+                  className="text-[11px] font-semibold"
+                >
+                  Set Size (total per language)
+                </text>
+              </g>
+
+              {/* ── DOT MATRIX ───────────────────────────────────────── */}
+              <g transform={`translate(${LABEL_W + SET_BAR_W + GAP}, ${BAR_AREA_H + GAP})`}>
+                {/* Row stripes */}
+                {languages.map((_, ri) => (
+                  <rect key={ri}
+                    x={0} y={ri * ROW_H}
+                    width={MATRIX_W} height={ROW_H}
+                    fill={ri % 2 === 0 ? '#f8fafc' : '#ffffff'}
+                  />
+                ))}
+
+                {/* Column hover zones + dots + lines */}
+                {sortedIntersections.map((ix, ci) => {
+                  const cx = ci * COL_W + COL_W / 2;
+                  const highlighted = hoveredIntersection === ci;
+                  const dimmed = hoveredIntersection !== null && !highlighted
+                    && hoveredSet === null;
+                  const setDimmed = hoveredSet !== null && !ix.languages.includes(hoveredSet);
+                  const opacity = (dimmed || setDimmed) ? 0.15 : 1;
+
+                  // Find row indices for active languages
+                  const activeRows = ix.languages
+                    .map(l => languages.indexOf(l))
+                    .filter(r => r >= 0)
+                    .sort((a, b) => a - b);
+
+                  return (
+                    <g key={ci} opacity={opacity} style={{transition: 'opacity 0.15s'}}
+                      onMouseEnter={(e) => handleIntHover(ci, e)}
+                      onMouseLeave={clearHover}
+                      className="bar-hover"
+                    >
+                      {/* Hover zone */}
+                      <rect x={ci * COL_W} y={0} width={COL_W} height={MATRIX_H}
+                        fill={highlighted ? 'rgba(20,184,166,0.08)' : 'transparent'} />
+
+                      {/* Connecting line */}
+                      {activeRows.length > 1 && (
+                        <line
+                          x1={cx} y1={activeRows[0] * ROW_H + ROW_H / 2}
+                          x2={cx} y2={activeRows[activeRows.length - 1] * ROW_H + ROW_H / 2}
+                          stroke={highlighted ? '#0d9488' : LINE_COLOR}
+                          strokeWidth={highlighted ? 3 : 2}
+                          strokeLinecap="round"
+                        />
+                      )}
+
+                      {/* Dots */}
+                      {languages.map((lang, ri) => {
+                        const active = ix.languages.includes(lang);
+                        return (
+                          <circle
+                            key={ri}
+                            cx={cx}
+                            cy={ri * ROW_H + ROW_H / 2}
+                            r={active ? (highlighted ? DOT_R + 1 : DOT_R) : 4}
+                            fill={active ? (highlighted ? '#0d9488' : DOT_ACTIVE) : DOT_INACTIVE}
+                            stroke={active && highlighted ? '#065f46' : 'none'}
+                            strokeWidth={1.5}
+                          />
+                        );
+                      })}
+                    </g>
+                  );
+                })}
+              </g>
+            </svg>
+          </div>
+
+          {/* ── OTHER LANGUAGES SIDE PANEL ──────────────────────────── */}
+          <div className="w-72 flex-shrink-0">
+            <div className="bg-white rounded-2xl shadow-lg border border-teal-100 p-5">
+              <h3 className="text-base font-bold text-teal-900 mb-1 flex items-center gap-2">
+                <svg className="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                </svg>
+                "Other" Languages Breakout
+              </h3>
+              <p className="text-xs text-teal-600 mb-3">
+                {DATA.otherLanguagesBreakout.reduce((s, o) => s + o.count, 0)} children selected "Other" —
+                here are the specific languages they reported:
+              </p>
+              <div className="space-y-1.5 max-h-[450px] overflow-y-auto pr-1">
+                {DATA.otherLanguagesBreakout.map((o, i) => {
+                  const maxOther = DATA.otherLanguagesBreakout[0].count;
+                  const pct = (o.count / maxOther) * 100;
+                  return (
+                    <div key={i} className="group relative">
+                      <div className="flex items-center justify-between text-sm py-1 px-2 rounded-lg hover:bg-teal-50 transition-colors">
+                        <span className={`font-medium ${
+                          o.language === 'Unspecified Other' ? 'text-slate-400 italic' : 'text-teal-800'
+                        }`}>
+                          {o.language}
+                        </span>
+                        <span className="font-bold text-teal-700 ml-2 tabular-nums">{o.count}</span>
+                      </div>
+                      <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-teal-100 rounded-full">
+                        <div className="h-full bg-teal-400 rounded-full transition-all"
+                          style={{width: `${pct}%`}} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Missing Data Note */}
+            <div className="mt-4 bg-amber-50 rounded-xl border border-amber-200 p-4">
+              <p className="text-xs text-amber-800 font-semibold mb-1">⚠ Missing Data</p>
+              <p className="text-xs text-amber-700">
+                <span className="font-bold">{DATA.missingLanguage}</span> of {DATA.totalRecords} records
+                ({(DATA.missingLanguage / DATA.totalRecords * 100).toFixed(1)}%)
+                had no home language reported and are not shown in the plot.
+              </p>
+            </div>
+
+            {/* Summary card */}
+            <div className="mt-4 bg-teal-50 rounded-xl border border-teal-200 p-4">
+              <p className="text-xs font-semibold text-teal-800 mb-2">📊 Quick Stats</p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="bg-white rounded-lg p-2 text-center">
+                  <div className="text-xl font-bold text-teal-700">{DATA.totalRecords}</div>
+                  <div className="text-teal-600">Total records</div>
+                </div>
+                <div className="bg-white rounded-lg p-2 text-center">
+                  <div className="text-xl font-bold text-teal-700">{DATA.uniqueLanguages}</div>
+                  <div className="text-teal-600">Languages</div>
+                </div>
+                <div className="bg-white rounded-lg p-2 text-center">
+                  <div className="text-xl font-bold text-teal-700">{DATA.uniqueCombinations}</div>
+                  <div className="text-teal-600">Combinations</div>
+                </div>
+                <div className="bg-white rounded-lg p-2 text-center">
+                  <div className="text-xl font-bold text-teal-700">
+                    {(DATA.intersections.filter(i => i.degree > 1).reduce((s,i) => s+i.count, 0) / DATA.recordsWithLanguage * 100).toFixed(0)}%
+                  </div>
+                  <div className="text-teal-600">Multilingual</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-4 text-center text-xs text-teal-500">
+          Data source: Language Milestones Fall 2025 Statewide Collection · Generated {new Date().toLocaleDateString()}
+        </div>
+      </div>
+
+      {/* ── TOOLTIP ──────────────────────────────────────────────────── */}
+      {tooltip && (
+        <div className="upset-tooltip"
+          style={{left: tooltip.x + 14, top: tooltip.y - 10}}>
+          <div className="tt-label">{tooltip.label}</div>
+          <div className="tt-count">{tooltip.count} children</div>
+          {tooltip.degree && (
+            <div style={{color:'#94a3b8', fontSize: 11, marginTop: 2}}>
+              Degree {tooltip.degree} ({tooltip.degree === 1 ? 'monolingual' :
+                tooltip.degree === 2 ? 'bilingual' :
+                tooltip.degree === 3 ? 'trilingual' : 'multilingual'})
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
