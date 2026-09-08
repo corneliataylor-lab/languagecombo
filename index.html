@@ -1,612 +1,452 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Home Language UpSet Plot — DHH Children, Fall 2025</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+</head><body><title>LMA Home Language Combinations</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-  body { font-family: 'Inter', system-ui, sans-serif; background: #f0fdfa; }
-  .upset-tooltip {
-    position: fixed; pointer-events: none; z-index: 1000;
-    background: rgba(15, 23, 42, 0.95); color: #fff; border-radius: 8px;
-    padding: 10px 14px; font-size: 13px; line-height: 1.5;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.25); max-width: 320px;
-    backdrop-filter: blur(4px); border: 1px solid rgba(94,234,212,0.3);
+  :root {
+    --ink: #1a2a2c;
+    --ink-2: #3f5a5d;
+    --ink-3: #6e8a8d;
+    --ground: #f6f9f9;
+    --surface: #ffffff;
+    --surface-2: #eef4f5;
+    --rule: #cfdedf;
+    --rule-soft: #e4eded;
+    --teal: #007A82;
+    --teal-deep: #00484E;
+    --teal-mid: #5FB1B6;
+    --teal-light: #9ED3D6;
+    --teal-tint: #dff0f1;
+    --dot-off: #d5e0e1;
+    --focus: #005f66;
+    --tip-bg: #12292b;
+    --tip-ink: #ffffff;
+    --tip-accent: #9ED3D6;
   }
-  .upset-tooltip .tt-label { color: #5eead4; font-weight: 600; font-size: 14px; }
-  .upset-tooltip .tt-count { color: #99f6e4; font-weight: 700; font-size: 16px; }
-  .bar-hover { cursor: pointer; }
-  .bar-hover:hover { filter: brightness(1.15); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #e6f0f0;
+      --ink-2: #b4c8ca;
+      --ink-3: #85a0a3;
+      --ground: #0f1c1d;
+      --surface: #172728;
+      --surface-2: #1e3234;
+      --rule: #34494b;
+      --rule-soft: #26393b;
+      --teal: #3fb2ba;
+      --teal-deep: #8fd8dc;
+      --teal-mid: #2a8a91;
+      --teal-light: #1c5d63;
+      --teal-tint: #1a3c3f;
+      --dot-off: #33474a;
+      --focus: #9ED3D6;
+      --tip-bg: #e6f0f0;
+      --tip-ink: #0f1c1d;
+      --tip-accent: #007A82;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #e6f0f0;
+    --ink-2: #b4c8ca;
+    --ink-3: #85a0a3;
+    --ground: #0f1c1d;
+    --surface: #172728;
+    --surface-2: #1e3234;
+    --rule: #34494b;
+    --rule-soft: #26393b;
+    --teal: #3fb2ba;
+    --teal-deep: #8fd8dc;
+    --teal-mid: #2a8a91;
+    --teal-light: #1c5d63;
+    --teal-tint: #1a3c3f;
+    --dot-off: #33474a;
+    --focus: #9ED3D6;
+    --tip-bg: #e6f0f0;
+    --tip-ink: #0f1c1d;
+    --tip-accent: #007A82;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: Arial, Helvetica, "Liberation Sans", sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+  .page { max-width: 1480px; margin: 0 auto; padding: 28px 24px 40px; }
+
+  /* Header */
+  .masthead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; border-bottom: 3px solid var(--teal); padding-bottom: 14px; }
+  .eyebrow { font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal); font-weight: 700; margin: 0 0 6px; }
+  h1 { font-size: 30px; line-height: 1.15; margin: 0; font-weight: 700; text-wrap: balance; }
+  .masthead .period { font-size: 16px; color: var(--ink-2); margin: 0; }
+  .lede { margin: 14px 0 0; max-width: 72ch; color: var(--ink-2); font-size: 16px; }
+  .lede strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  /* Controls row */
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin: 20px 0 14px; }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; background: var(--surface); }
+  .seg .seg-label { padding: 8px 12px; font-size: 14px; font-weight: 700; color: var(--ink-2); background: var(--surface-2); border-right: 1px solid var(--rule); }
+  .seg button { border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 14px; padding: 8px 14px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--teal); color: #fff; }
+  .seg button:focus-visible, .btn:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+  .btn { border: 1px solid var(--rule); background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+  .btn[aria-expanded="true"] { background: var(--surface-2); }
+  .legend { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink-2); flex-wrap: wrap; }
+  .legend .sw { display: inline-flex; align-items: center; gap: 5px; }
+  .legend .sw i { display: inline-block; width: 16px; height: 16px; border-radius: 3px; border: 1px solid var(--teal-deep); }
+
+  .howto { background: var(--surface); border: 1px solid var(--rule); border-left: 4px solid var(--teal); padding: 14px 18px; margin: 0 0 14px; font-size: 15px; max-width: 90ch; }
+  .howto p { margin: 0 0 8px; }
+  .howto dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; }
+  .howto dt { font-weight: 700; }
+  .howto dd { margin: 0; }
+
+  /* Layout */
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+  @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; }
+  .chart-wrap { padding: 16px 12px 8px; overflow-x: auto; }
+  svg { display: block; font-family: inherit; }
+  svg text { fill: var(--ink-2); font-size: 14px; }
+  svg .lbl-lang { fill: var(--ink); font-weight: 700; }
+  svg .lbl-axis { fill: var(--ink-2); font-weight: 700; }
+  svg .lbl-tick { fill: var(--ink-3); font-size: 14px; }
+  svg .lbl-val { fill: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+  svg .grid-line { stroke: var(--rule-soft); stroke-width: 1; }
+  svg .axis-line { stroke: var(--rule); stroke-width: 1; }
+  svg .stripe { fill: var(--surface-2); }
+  svg .col { cursor: pointer; }
+  svg .col rect.bar { stroke: var(--teal-deep); stroke-width: 1; }
+  svg .col.hi rect.bar { stroke-width: 2.5; }
+  svg .col rect.hit { fill: transparent; }
+  svg .col.hi rect.hit { fill: var(--teal-tint); }
+  svg .dim { opacity: 0.18; }
+  svg .row { cursor: pointer; }
+  svg .row rect.setbar { fill: var(--teal); }
+  svg .row.hi rect.setbar { fill: var(--teal-deep); }
+  svg .dot-on { fill: var(--teal-deep); }
+  svg .dot-off { fill: var(--dot-off); }
+  svg .link { stroke: var(--teal-deep); stroke-width: 2.5; stroke-linecap: round; }
+  svg .col.hi .link { stroke-width: 4; }
+  svg .col:focus { outline: none; }
+  svg .col:focus-visible rect.hit { fill: var(--teal-tint); stroke: var(--focus); stroke-width: 2; }
+
+  /* Side panel */
+  .side { display: grid; gap: 16px; }
+  .side .panel { padding: 16px 18px; }
+  .side h2 { font-size: 17px; margin: 0 0 4px; }
+  .side .sub { font-size: 14px; color: var(--ink-2); margin: 0 0 10px; }
+  .otherlist { max-height: 460px; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+  .otherlist li { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 10px; padding: 5px 0 6px; border-bottom: 1px solid var(--rule-soft); font-size: 14px; }
+  .otherlist li:last-child { border-bottom: 0; }
+  .otherlist .n { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .otherlist .meter { grid-column: 1 / -1; height: 3px; background: var(--rule-soft); }
+  .otherlist .meter i { display: block; height: 100%; background: var(--teal); }
+  .otherlist .unspec { color: var(--ink-3); font-style: italic; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { border: 1px solid var(--rule); border-radius: 4px; padding: 10px 8px; text-align: center; background: var(--ground); }
+  .stat b { display: block; font-size: 26px; line-height: 1.1; color: var(--teal); font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 14px; color: var(--ink-2); }
+  .note { border-left: 4px solid var(--ink-3); }
+  .note p { margin: 0; font-size: 14px; color: var(--ink-2); }
+  .note p + p { margin-top: 6px; }
+
+  /* Table view */
+  .tablewrap { margin-top: 16px; overflow-x: auto; }
+  .tablewrap[hidden] { display: none; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; background: var(--surface); }
+  th, td { border: 1px solid var(--rule); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: var(--surface-2); font-weight: 700; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  caption { text-align: left; font-weight: 700; padding: 8px 0; }
+
+  footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid var(--rule); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; font-size: 14px; color: var(--ink-2); }
+  footer .brand { font-weight: 700; color: var(--teal); }
+
+  .tip { position: fixed; pointer-events: none; z-index: 20; background: var(--tip-bg); color: var(--tip-ink); border-radius: 6px; padding: 10px 14px; font-size: 14px; line-height: 1.4; max-width: 320px; box-shadow: 0 6px 24px rgba(0,0,0,0.25); }
+  .tip[hidden] { display: none; }
+  .tip .t1 { font-weight: 700; color: var(--tip-accent); }
+  .tip .t2 { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .tip .t3 { opacity: 0.8; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @media (prefers-reduced-motion: no-preference) {
+    svg .col, svg .row, svg .col rect.bar, svg .row rect.setbar { transition: opacity 0.15s ease; }
+  }
 </style>
-</head>
-<body>
-<div id="root"></div>
 
-<script type="text/babel">
-// ═══════════════════════════════════════════════════════════════════════════
-// EMBEDDED DATA (from home_language_upset_data.json)
-// ═══════════════════════════════════════════════════════════════════════════
-const DATA = {
-  "totalRecords": 628,
-  "recordsWithLanguage": 566,
-  "missingLanguage": 62,
-  "uniqueLanguages": 9,
-  "uniqueCombinations": 37,
-  "languages": ["English","Spanish","ASL","Home signs/gestures","Other","Vietnamese","Cantonese","Tagalog/Pilipino","Hmong"],
-  "setSizes": [
-    {"language":"English","count":371},{"language":"Spanish","count":250},
-    {"language":"ASL","count":121},{"language":"Home signs/gestures","count":74},
-    {"language":"Other","count":66},{"language":"Vietnamese","count":13},
-    {"language":"Cantonese","count":13},{"language":"Tagalog/Pilipino","count":4},
-    {"language":"Hmong","count":2}
-  ],
-  "intersections": [
-    {"languages":["English"],"count":152,"degree":1},
-    {"languages":["Spanish"],"count":96,"degree":1},
-    {"languages":["English","Spanish"],"count":70,"degree":2},
-    {"languages":["English","ASL"],"count":42,"degree":2},
-    {"languages":["Other"],"count":30,"degree":1},
-    {"languages":["ASL"],"count":19,"degree":1},
-    {"languages":["English","Spanish","Home signs/gestures"],"count":18,"degree":3},
-    {"languages":["English","Spanish","ASL"],"count":16,"degree":3},
-    {"languages":["English","Other"],"count":13,"degree":2},
-    {"languages":["Spanish","Other"],"count":12,"degree":2},
-    {"languages":["English","ASL","Home signs/gestures"],"count":12,"degree":3},
-    {"languages":["English","Spanish","ASL","Home signs/gestures"],"count":11,"degree":4},
-    {"languages":["English","Home signs/gestures"],"count":10,"degree":2},
-    {"languages":["Spanish","Home signs/gestures"],"count":10,"degree":2},
-    {"languages":["Spanish","ASL"],"count":9,"degree":2},
-    {"languages":["English","Vietnamese"],"count":8,"degree":2},
-    {"languages":["English","Cantonese"],"count":5,"degree":2},
-    {"languages":["Cantonese"],"count":5,"degree":1},
-    {"languages":["Spanish","ASL","Other"],"count":3,"degree":3},
-    {"languages":["Vietnamese"],"count":3,"degree":1},
-    {"languages":["English","Tagalog/Pilipino"],"count":2,"degree":2},
-    {"languages":["Spanish","ASL","Home signs/gestures"],"count":2,"degree":3},
-    {"languages":["English","Home signs/gestures","Other"],"count":2,"degree":3},
-    {"languages":["Home signs/gestures"],"count":2,"degree":1},
-    {"languages":["English","Spanish","Other"],"count":2,"degree":3},
-    {"languages":["English","ASL","Tagalog/Pilipino"],"count":1,"degree":3},
-    {"languages":["Spanish","Home signs/gestures","Other"],"count":1,"degree":3},
-    {"languages":["ASL","Home signs/gestures"],"count":1,"degree":2},
-    {"languages":["English","Home signs/gestures","Cantonese"],"count":1,"degree":3},
-    {"languages":["ASL","Other"],"count":1,"degree":2},
-    {"languages":["English","ASL","Other"],"count":1,"degree":3},
-    {"languages":["English","ASL","Home signs/gestures","Vietnamese"],"count":1,"degree":4},
-    {"languages":["Hmong"],"count":1,"degree":1},
-    {"languages":["English","Other","Cantonese"],"count":1,"degree":3},
-    {"languages":["English","Home signs/gestures","Cantonese","Vietnamese"],"count":1,"degree":4},
-    {"languages":["English","ASL","Home signs/gestures","Hmong"],"count":1,"degree":4},
-    {"languages":["English","ASL","Home signs/gestures","Tagalog/Pilipino"],"count":1,"degree":4}
-  ],
-  "otherLanguagesBreakout": [
-    {"language":"Unspecified Other","count":10},{"language":"Mixteco","count":9},
-    {"language":"Mandarin","count":7},{"language":"Russian","count":5},
-    {"language":"Punjabi","count":4},{"language":"Farsi","count":3},
-    {"language":"Mam","count":3},{"language":"Korean","count":2},
-    {"language":"Arabic","count":2},{"language":"Haitian Creole","count":2},
-    {"language":"Hebrew","count":2},{"language":"Japanese","count":2},
-    {"language":"Triqui","count":1},{"language":"Khazak","count":1},
-    {"language":"Chinese","count":1},{"language":"Creole","count":1},
-    {"language":"Tamil","count":1},{"language":"Otomian languages (Mixteco)","count":1},
-    {"language":"Hindi","count":1},{"language":"Asian Indian","count":1},
-    {"language":"Zapateco","count":1},{"language":"Portuguese","count":1},
-    {"language":"Portugese","count":1},{"language":"Deaf/Blind","count":1},
-    {"language":"Ukrainian","count":1},{"language":"Czech/Slovak","count":1},
-    {"language":"Armenian","count":1}
-  ]
-};
-
-// ═══════════════════════════════════════════════════════════════════════════
-// COLOR PALETTE — teal/blue-green gradient by degree
-// ═══════════════════════════════════════════════════════════════════════════
-const DEGREE_COLORS = {
-  1: '#99f6e4', // teal-200
-  2: '#5eead4', // teal-300
-  3: '#2dd4bf', // teal-400
-  4: '#0d9488', // teal-600
-  5: '#115e59', // teal-800
-};
-const getDegreeColor = (d) => DEGREE_COLORS[Math.min(d, 5)] || DEGREE_COLORS[5];
-const SET_BAR_COLOR = '#14b8a6'; // teal-500
-const DOT_ACTIVE = '#0f766e';   // teal-700
-const DOT_INACTIVE = '#e2e8f0'; // slate-200
-const LINE_COLOR = '#0f766e';
-
-// ═══════════════════════════════════════════════════════════════════════════
-// MAIN APP
-// ═══════════════════════════════════════════════════════════════════════════
-function App() {
-  const [sortMode, setSortMode] = React.useState('size'); // 'size' | 'degree'
-  const [hoveredIntersection, setHoveredIntersection] = React.useState(null);
-  const [hoveredSet, setHoveredSet] = React.useState(null);
-  const [tooltip, setTooltip] = React.useState(null);
-  const [showInfo, setShowInfo] = React.useState(false);
-
-  // Sort intersections
-  const sortedIntersections = React.useMemo(() => {
-    const arr = [...DATA.intersections];
-    if (sortMode === 'size') {
-      arr.sort((a, b) => b.count - a.count);
-    } else {
-      arr.sort((a, b) => a.degree - b.degree || b.count - a.count);
-    }
-    return arr;
-  }, [sortMode]);
-
-  const languages = DATA.languages; // already sorted by set size desc
-  const maxSetSize = DATA.setSizes[0].count;
-  const maxIntSize = Math.max(...sortedIntersections.map(i => i.count));
-
-  // ── Dimensions ────────────────────────────────────────────────────────
-  const LABEL_W = 160;
-  const SET_BAR_W = 180;
-  const GAP = 12;
-  const COL_W = 26;
-  const ROW_H = 28;
-  const BAR_AREA_H = 160;
-  const DOT_R = 8;
-  const NUM_COLS = sortedIntersections.length;
-  const NUM_ROWS = languages.length;
-  const MATRIX_W = NUM_COLS * COL_W;
-  const MATRIX_H = NUM_ROWS * ROW_H;
-  const TOTAL_W = LABEL_W + SET_BAR_W + GAP + MATRIX_W + 20;
-  const TOTAL_H = BAR_AREA_H + GAP + MATRIX_H + 10;
-
-  // ── Mouse handlers ───────────────────────────────────────────────────
-  const handleIntHover = (idx, e) => {
-    const ix = sortedIntersections[idx];
-    setHoveredIntersection(idx);
-    setTooltip({
-      x: e.clientX, y: e.clientY,
-      label: ix.languages.join(' + '),
-      count: ix.count,
-      degree: ix.degree,
-      type: 'intersection'
-    });
-  };
-  const handleSetHover = (lang, e) => {
-    const s = DATA.setSizes.find(s => s.language === lang);
-    setHoveredSet(lang);
-    setTooltip({
-      x: e.clientX, y: e.clientY,
-      label: lang,
-      count: s.count,
-      type: 'set'
-    });
-  };
-  const handleMouseMove = (e) => {
-    if (tooltip) setTooltip(t => t ? {...t, x: e.clientX, y: e.clientY} : null);
-  };
-  const clearHover = () => {
-    setHoveredIntersection(null);
-    setHoveredSet(null);
-    setTooltip(null);
-  };
-
-  // Is a language highlighted?
-  const isLangHighlighted = (lang) => {
-    if (hoveredSet === lang) return true;
-    if (hoveredIntersection !== null) {
-      return sortedIntersections[hoveredIntersection].languages.includes(lang);
-    }
-    return false;
-  };
-
-  return (
-    <div className="min-h-screen p-4 md:p-8" onMouseMove={handleMouseMove}>
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="max-w-[1400px] mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-teal-900 mb-1">
-            Home Language Combinations — DHH Children
-          </h1>
-          <p className="text-teal-700 text-sm">
-            Language Milestones Assessment, Fall 2025 Statewide Collection&ensp;·&ensp;
-            <span className="font-semibold">{DATA.recordsWithLanguage}</span> children with language data
-            ({DATA.missingLanguage} missing)&ensp;·&ensp;
-            <span className="font-semibold">{DATA.uniqueCombinations}</span> unique combinations across&ensp;
-            <span className="font-semibold">{DATA.uniqueLanguages}</span> language categories
-          </p>
-        </div>
-
-        {/* ── Controls ───────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <div className="flex items-center bg-white rounded-lg shadow-sm border border-teal-200 overflow-hidden">
-            <span className="px-3 py-2 text-xs font-semibold text-teal-700 bg-teal-50 border-r border-teal-200">
-              Sort intersections by
-            </span>
-            <button
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
-                sortMode === 'size' ? 'bg-teal-600 text-white' : 'bg-white text-teal-700 hover:bg-teal-50'
-              }`}
-              onClick={() => setSortMode('size')}
-            >
-              Size ↓
-            </button>
-            <button
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
-                sortMode === 'degree' ? 'bg-teal-600 text-white' : 'bg-white text-teal-700 hover:bg-teal-50'
-              }`}
-              onClick={() => setSortMode('degree')}
-            >
-              Degree ↑
-            </button>
-          </div>
-
-          <button
-            className="flex items-center gap-1 px-3 py-2 text-xs font-medium text-teal-700 bg-white border border-teal-200 rounded-lg shadow-sm hover:bg-teal-50 transition-colors"
-            onClick={() => setShowInfo(!showInfo)}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            How to read this chart
-          </button>
-
-          {/* Legend */}
-          <div className="flex items-center gap-2 ml-auto text-xs text-teal-700">
-            <span className="font-medium">Complexity:</span>
-            {[1,2,3,4].map(d => (
-              <span key={d} className="flex items-center gap-1">
-                <span className="inline-block w-4 h-4 rounded" style={{background: getDegreeColor(d)}}></span>
-                {d === 4 ? '4+' : d}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Info panel ─────────────────────────────────────────────── */}
-        {showInfo && (
-          <div className="mb-4 p-4 bg-teal-50 border border-teal-200 rounded-xl text-sm text-teal-800 leading-relaxed">
-            <p className="font-semibold mb-2">📖 How to Read an UpSet Plot</p>
-            <p className="mb-2">
-              This chart shows <strong>all combinations</strong> of home languages reported for DHH children.
-              Unlike a Venn diagram, it can clearly display many overlapping sets.
-            </p>
-            <ul className="list-disc ml-5 space-y-1">
-              <li><strong>Horizontal bars (left)</strong> — Total count of children who use each language,
-                  across <em>all</em> combinations. For example, "English = 371" means 371 children have
-                  English as one of their home languages (alone or combined with others).</li>
-              <li><strong>Vertical bars (top)</strong> — Count of children with that <em>exact</em> combination.
-                  Each column represents one specific set of languages.</li>
-              <li><strong>Dot matrix (below)</strong> — Filled circles show which languages are in each combination.
-                  Lines connect multi-language combinations. A single dot = monolingual.</li>
-              <li><strong>Colors</strong> — Lighter teal = monolingual; progressively darker =
-                  more languages in the combination.</li>
-              <li><strong>Hover</strong> over any bar or dot column to see details.</li>
-            </ul>
-          </div>
-        )}
-
-        {/* ── Main Chart + Side Panel ─────────────────────────────────── */}
-        <div className="flex gap-6 items-start">
-          {/* Main UpSet chart */}
-          <div className="bg-white rounded-2xl shadow-lg border border-teal-100 p-5 overflow-x-auto flex-1">
-            <svg
-              width={TOTAL_W}
-              height={TOTAL_H}
-              viewBox={`0 0 ${TOTAL_W} ${TOTAL_H}`}
-              className="block"
-              onMouseLeave={clearHover}
-            >
-              {/* ── INTERSECTION BARS (top) ───────────────────────────── */}
-              <g transform={`translate(${LABEL_W + SET_BAR_W + GAP}, 0)`}>
-                {/* Y-axis for bars */}
-                <line x1={-2} y1={BAR_AREA_H} x2={MATRIX_W} y2={BAR_AREA_H}
-                  stroke="#94a3b8" strokeWidth={1} />
-                {/* Grid lines */}
-                {[0.25, 0.5, 0.75, 1.0].map(frac => {
-                  const yy = BAR_AREA_H - (BAR_AREA_H - 20) * frac;
-                  const val = Math.round(maxIntSize * frac);
-                  return (
-                    <g key={frac}>
-                      <line x1={-2} y1={yy} x2={MATRIX_W} y2={yy}
-                        stroke="#e2e8f0" strokeWidth={0.5} strokeDasharray="3,3" />
-                      <text x={-6} y={yy + 4} textAnchor="end"
-                        className="text-[9px]" fill="#94a3b8">{val}</text>
-                    </g>
-                  );
-                })}
-                <text x={-6} y={BAR_AREA_H + 4} textAnchor="end"
-                  className="text-[9px]" fill="#94a3b8">0</text>
-
-                {/* Bars */}
-                {sortedIntersections.map((ix, ci) => {
-                  const barH = (ix.count / maxIntSize) * (BAR_AREA_H - 20);
-                  const x = ci * COL_W + (COL_W - 18) / 2;
-                  const highlighted = hoveredIntersection === ci;
-                  const dimmed = hoveredIntersection !== null && !highlighted
-                    && hoveredSet === null;
-                  const setDimmed = hoveredSet !== null && !ix.languages.includes(hoveredSet);
-                  const opacity = (dimmed || setDimmed) ? 0.2 : 1;
-
-                  return (
-                    <g key={ci} className="bar-hover"
-                      onMouseEnter={(e) => handleIntHover(ci, e)}
-                      onMouseLeave={clearHover}
-                    >
-                      <rect
-                        x={x} y={BAR_AREA_H - barH} width={18} height={barH}
-                        rx={3}
-                        fill={getDegreeColor(ix.degree)}
-                        opacity={opacity}
-                        stroke={highlighted ? '#0f766e' : 'none'}
-                        strokeWidth={highlighted ? 2 : 0}
-                      />
-                      {/* Count label on top of bar */}
-                      {ix.count >= (maxIntSize * 0.03) && (
-                        <text
-                          x={x + 9} y={BAR_AREA_H - barH - 4}
-                          textAnchor="middle" fill="#0f766e"
-                          className="text-[9px] font-semibold"
-                          opacity={opacity}
-                        >
-                          {ix.count}
-                        </text>
-                      )}
-                    </g>
-                  );
-                })}
-
-                {/* Axis label */}
-                <text x={MATRIX_W / 2} y={-2} textAnchor="middle"
-                  fill="#0f766e" className="text-[11px] font-semibold">
-                  Intersection Size (exact combination count)
-                </text>
-              </g>
-
-              {/* ── SET SIZE BARS (left) ──────────────────────────────── */}
-              <g transform={`translate(0, ${BAR_AREA_H + GAP})`}>
-                {/* Labels */}
-                {languages.map((lang, ri) => {
-                  const highlighted = isLangHighlighted(lang);
-                  const dimmed = (hoveredIntersection !== null || hoveredSet !== null) && !highlighted;
-                  return (
-                    <text
-                      key={lang}
-                      x={LABEL_W - 8}
-                      y={ri * ROW_H + ROW_H / 2 + 4}
-                      textAnchor="end"
-                      fill={highlighted ? '#0f766e' : dimmed ? '#cbd5e1' : '#334155'}
-                      className="text-[12px] font-medium"
-                      style={{transition: 'fill 0.15s'}}
-                    >
-                      {lang}
-                    </text>
-                  );
-                })}
-
-                {/* Bars */}
-                {DATA.setSizes.map((s, ri) => {
-                  const barW = (s.count / maxSetSize) * (SET_BAR_W - 10);
-                  const highlighted = isLangHighlighted(s.language);
-                  const dimmed = (hoveredIntersection !== null || hoveredSet !== null) && !highlighted;
-
-                  return (
-                    <g key={s.language} className="bar-hover"
-                      onMouseEnter={(e) => handleSetHover(s.language, e)}
-                      onMouseLeave={clearHover}
-                    >
-                      {/* Background row stripe */}
-                      <rect
-                        x={LABEL_W} y={ri * ROW_H}
-                        width={SET_BAR_W} height={ROW_H}
-                        fill={ri % 2 === 0 ? '#f8fafc' : '#ffffff'}
-                        opacity={dimmed ? 0.3 : 1}
-                      />
-                      {/* Bar (drawn right-to-left from right edge) */}
-                      <rect
-                        x={LABEL_W + SET_BAR_W - barW}
-                        y={ri * ROW_H + (ROW_H - 16) / 2}
-                        width={barW} height={16} rx={3}
-                        fill={highlighted ? '#0d9488' : SET_BAR_COLOR}
-                        opacity={dimmed ? 0.2 : 1}
-                        stroke={highlighted ? '#0f766e' : 'none'}
-                        strokeWidth={highlighted ? 1.5 : 0}
-                        style={{transition: 'opacity 0.15s'}}
-                      />
-                      {/* Count label */}
-                      <text
-                        x={LABEL_W + SET_BAR_W - barW - 5}
-                        y={ri * ROW_H + ROW_H / 2 + 4}
-                        textAnchor="end"
-                        fill={dimmed ? '#cbd5e1' : '#0f766e'}
-                        className="text-[10px] font-semibold"
-                      >
-                        {s.count}
-                      </text>
-                    </g>
-                  );
-                })}
-
-                {/* Axis label */}
-                <text
-                  x={LABEL_W + SET_BAR_W / 2}
-                  y={MATRIX_H + 18}
-                  textAnchor="middle"
-                  fill="#0f766e"
-                  className="text-[11px] font-semibold"
-                >
-                  Set Size (total per language)
-                </text>
-              </g>
-
-              {/* ── DOT MATRIX ───────────────────────────────────────── */}
-              <g transform={`translate(${LABEL_W + SET_BAR_W + GAP}, ${BAR_AREA_H + GAP})`}>
-                {/* Row stripes */}
-                {languages.map((_, ri) => (
-                  <rect key={ri}
-                    x={0} y={ri * ROW_H}
-                    width={MATRIX_W} height={ROW_H}
-                    fill={ri % 2 === 0 ? '#f8fafc' : '#ffffff'}
-                  />
-                ))}
-
-                {/* Column hover zones + dots + lines */}
-                {sortedIntersections.map((ix, ci) => {
-                  const cx = ci * COL_W + COL_W / 2;
-                  const highlighted = hoveredIntersection === ci;
-                  const dimmed = hoveredIntersection !== null && !highlighted
-                    && hoveredSet === null;
-                  const setDimmed = hoveredSet !== null && !ix.languages.includes(hoveredSet);
-                  const opacity = (dimmed || setDimmed) ? 0.15 : 1;
-
-                  // Find row indices for active languages
-                  const activeRows = ix.languages
-                    .map(l => languages.indexOf(l))
-                    .filter(r => r >= 0)
-                    .sort((a, b) => a - b);
-
-                  return (
-                    <g key={ci} opacity={opacity} style={{transition: 'opacity 0.15s'}}
-                      onMouseEnter={(e) => handleIntHover(ci, e)}
-                      onMouseLeave={clearHover}
-                      className="bar-hover"
-                    >
-                      {/* Hover zone */}
-                      <rect x={ci * COL_W} y={0} width={COL_W} height={MATRIX_H}
-                        fill={highlighted ? 'rgba(20,184,166,0.08)' : 'transparent'} />
-
-                      {/* Connecting line */}
-                      {activeRows.length > 1 && (
-                        <line
-                          x1={cx} y1={activeRows[0] * ROW_H + ROW_H / 2}
-                          x2={cx} y2={activeRows[activeRows.length - 1] * ROW_H + ROW_H / 2}
-                          stroke={highlighted ? '#0d9488' : LINE_COLOR}
-                          strokeWidth={highlighted ? 3 : 2}
-                          strokeLinecap="round"
-                        />
-                      )}
-
-                      {/* Dots */}
-                      {languages.map((lang, ri) => {
-                        const active = ix.languages.includes(lang);
-                        return (
-                          <circle
-                            key={ri}
-                            cx={cx}
-                            cy={ri * ROW_H + ROW_H / 2}
-                            r={active ? (highlighted ? DOT_R + 1 : DOT_R) : 4}
-                            fill={active ? (highlighted ? '#0d9488' : DOT_ACTIVE) : DOT_INACTIVE}
-                            stroke={active && highlighted ? '#065f46' : 'none'}
-                            strokeWidth={1.5}
-                          />
-                        );
-                      })}
-                    </g>
-                  );
-                })}
-              </g>
-            </svg>
-          </div>
-
-          {/* ── OTHER LANGUAGES SIDE PANEL ──────────────────────────── */}
-          <div className="w-72 flex-shrink-0">
-            <div className="bg-white rounded-2xl shadow-lg border border-teal-100 p-5">
-              <h3 className="text-base font-bold text-teal-900 mb-1 flex items-center gap-2">
-                <svg className="w-5 h-5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                    d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                </svg>
-                "Other" Languages Breakout
-              </h3>
-              <p className="text-xs text-teal-600 mb-3">
-                {DATA.otherLanguagesBreakout.reduce((s, o) => s + o.count, 0)} children selected "Other" —
-                here are the specific languages they reported:
-              </p>
-              <div className="space-y-1.5 max-h-[450px] overflow-y-auto pr-1">
-                {DATA.otherLanguagesBreakout.map((o, i) => {
-                  const maxOther = DATA.otherLanguagesBreakout[0].count;
-                  const pct = (o.count / maxOther) * 100;
-                  return (
-                    <div key={i} className="group relative">
-                      <div className="flex items-center justify-between text-sm py-1 px-2 rounded-lg hover:bg-teal-50 transition-colors">
-                        <span className={`font-medium ${
-                          o.language === 'Unspecified Other' ? 'text-slate-400 italic' : 'text-teal-800'
-                        }`}>
-                          {o.language}
-                        </span>
-                        <span className="font-bold text-teal-700 ml-2 tabular-nums">{o.count}</span>
-                      </div>
-                      <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-teal-100 rounded-full">
-                        <div className="h-full bg-teal-400 rounded-full transition-all"
-                          style={{width: `${pct}%`}} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Missing Data Note */}
-            <div className="mt-4 bg-amber-50 rounded-xl border border-amber-200 p-4">
-              <p className="text-xs text-amber-800 font-semibold mb-1">⚠ Missing Data</p>
-              <p className="text-xs text-amber-700">
-                <span className="font-bold">{DATA.missingLanguage}</span> of {DATA.totalRecords} records
-                ({(DATA.missingLanguage / DATA.totalRecords * 100).toFixed(1)}%)
-                had no home language reported and are not shown in the plot.
-              </p>
-            </div>
-
-            {/* Summary card */}
-            <div className="mt-4 bg-teal-50 rounded-xl border border-teal-200 p-4">
-              <p className="text-xs font-semibold text-teal-800 mb-2">📊 Quick Stats</p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-white rounded-lg p-2 text-center">
-                  <div className="text-xl font-bold text-teal-700">{DATA.totalRecords}</div>
-                  <div className="text-teal-600">Total records</div>
-                </div>
-                <div className="bg-white rounded-lg p-2 text-center">
-                  <div className="text-xl font-bold text-teal-700">{DATA.uniqueLanguages}</div>
-                  <div className="text-teal-600">Languages</div>
-                </div>
-                <div className="bg-white rounded-lg p-2 text-center">
-                  <div className="text-xl font-bold text-teal-700">{DATA.uniqueCombinations}</div>
-                  <div className="text-teal-600">Combinations</div>
-                </div>
-                <div className="bg-white rounded-lg p-2 text-center">
-                  <div className="text-xl font-bold text-teal-700">
-                    {(DATA.intersections.filter(i => i.degree > 1).reduce((s,i) => s+i.count, 0) / DATA.recordsWithLanguage * 100).toFixed(0)}%
-                  </div>
-                  <div className="text-teal-600">Multilingual</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-4 text-center text-xs text-teal-500">
-          Data source: Language Milestones Fall 2025 Statewide Collection · Generated {new Date().toLocaleDateString()}
-        </div>
-      </div>
-
-      {/* ── TOOLTIP ──────────────────────────────────────────────────── */}
-      {tooltip && (
-        <div className="upset-tooltip"
-          style={{left: tooltip.x + 14, top: tooltip.y - 10}}>
-          <div className="tt-label">{tooltip.label}</div>
-          <div className="tt-count">{tooltip.count} children</div>
-          {tooltip.degree && (
-            <div style={{color:'#94a3b8', fontSize: 11, marginTop: 2}}>
-              Degree {tooltip.degree} ({tooltip.degree === 1 ? 'monolingual' :
-                tooltip.degree === 2 ? 'bilingual' :
-                tooltip.degree === 3 ? 'trilingual' : 'multilingual'})
-            </div>
-          )}
-        </div>
-      )}
+<div class="page">
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">CDE LEAD-K Language Milestones Assessment</p>
+      <h1>Home Language Combinations Among Deaf and Hard of Hearing Children</h1>
     </div>
-  );
+    <p class="period">2025-26 Statewide Collection, Fall 2025 and Spring 2026</p>
+  </header>
+  <p class="lede" id="lede"></p>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Sort combinations">
+      <span class="seg-label">Sort combinations by</span>
+      <button type="button" id="sort-size" aria-pressed="true">Count, largest first</button>
+      <button type="button" id="sort-degree" aria-pressed="false">Number of languages</button>
+    </div>
+    <button type="button" class="btn" id="howto-btn" aria-expanded="false" aria-controls="howto">How to read this chart</button>
+    <button type="button" class="btn" id="table-btn" aria-expanded="false" aria-controls="tablewrap">Show as table</button>
+    <div class="legend" aria-label="Bar shading by number of languages in the combination">
+      <span>Languages in combination:</span>
+      <span class="sw"><i style="background: var(--teal-light)"></i>1</span>
+      <span class="sw"><i style="background: var(--teal-mid)"></i>2</span>
+      <span class="sw"><i style="background: var(--teal)"></i>3</span>
+      <span class="sw"><i style="background: var(--teal-deep)"></i>4</span>
+    </div>
+  </div>
+
+  <div class="howto" id="howto" hidden>
+    <p>This is an UpSet plot. It shows every combination of home languages reported for a child, which a Venn diagram cannot do once there are more than three languages.</p>
+    <dl>
+      <dt>Horizontal bars (left)</dt><dd>Total children who use each language in any combination. English 762 means 762 children have English as one of their home languages, alone or with others.</dd>
+      <dt>Vertical bars (top)</dt><dd>Children with that exact combination. Each column is one specific set of languages.</dd>
+      <dt>Dot matrix</dt><dd>Filled dots show which languages make up each column. A line joins the dots of a multilingual combination; a single dot is a one-language home.</dd>
+      <dt>Shading</dt><dd>Lighter bars are one-language homes; darker bars have more languages. The dots carry the same information, so shading is never the only cue.</dd>
+      <dt>Hover or tab</dt><dd>Move over a column or a language bar for the exact count. Columns are keyboard focusable.</dd>
+    </dl>
+  </div>
+
+  <div class="grid">
+    <div class="panel chart-wrap" id="chart"></div>
+    <aside class="side">
+      <div class="panel">
+        <h2>Languages reported as "Other"</h2>
+        <p class="sub" id="other-sub"></p>
+        <ul class="otherlist" id="otherlist"></ul>
+      </div>
+      <div class="panel note">
+        <p><strong>Missing data.</strong> <span id="missing-note"></span></p>
+        <p><strong>Who is counted.</strong> Each child appears once, using their most recent assessment. Children assessed in both fall and spring contribute their spring record.</p>
+      </div>
+      <div class="panel">
+        <h2>At a glance</h2>
+        <div class="stats" id="stats"></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="tablewrap" id="tablewrap" hidden>
+    <table id="combo-table">
+      <caption>All home language combinations, one row per combination</caption>
+      <thead><tr><th scope="col">Combination</th><th scope="col" class="num">Languages</th><th scope="col" class="num">Children</th><th scope="col" class="num">Percent of children with language data</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <footer>
+    <span class="brand">CDE LEAD-K&reg; Language Milestones Assessment</span>
+    <span>Source: LMA statewide data, fall 2025 and spring 2026 collection windows, one record per child.</span>
+  </footer>
+</div>
+<div class="tip" id="tip" hidden role="status" aria-live="polite"></div>
+
+<script>
+const DATA = {"totalRecords":1079,"recordsWithLanguage":1041,"missingLanguage":38,"uniqueLanguages":9,"uniqueCombinations":40,
+"languages":["English","Spanish","ASL","Other","Home signs/gestures","Vietnamese","Cantonese","Tagalog/Pilipino","Hmong"],
+"setSizes":[{"language":"English","count":762},{"language":"Spanish","count":431},{"language":"ASL","count":246},{"language":"Other","count":103},{"language":"Home signs/gestures","count":86},{"language":"Vietnamese","count":18},{"language":"Cantonese","count":17},{"language":"Tagalog/Pilipino","count":13},{"language":"Hmong","count":3}],
+"intersections":[
+{"languages":["English"],"count":324,"degree":1},
+{"languages":["English","Spanish"],"count":156,"degree":2},
+{"languages":["Spanish"],"count":141,"degree":1},
+{"languages":["English","ASL"],"count":85,"degree":2},
+{"languages":["English","Spanish","ASL"],"count":57,"degree":3},
+{"languages":["Other"],"count":42,"degree":1},
+{"languages":["ASL"],"count":32,"degree":1},
+{"languages":["English","Other"],"count":30,"degree":2},
+{"languages":["English","ASL","Home signs/gestures"],"count":22,"degree":3},
+{"languages":["Spanish","ASL"],"count":16,"degree":2},
+{"languages":["English","Home signs/gestures"],"count":15,"degree":2},
+{"languages":["Spanish","Other"],"count":13,"degree":2},
+{"languages":["English","Spanish","Home signs/gestures"],"count":13,"degree":3},
+{"languages":["Spanish","Home signs/gestures"],"count":11,"degree":2},
+{"languages":["English","Spanish","ASL","Home signs/gestures"],"count":11,"degree":4},
+{"languages":["English","Cantonese"],"count":10,"degree":2},
+{"languages":["English","Vietnamese"],"count":9,"degree":2},
+{"languages":["English","Tagalog/Pilipino"],"count":8,"degree":2},
+{"languages":["Cantonese"],"count":6,"degree":1},
+{"languages":["Spanish","ASL","Home signs/gestures"],"count":5,"degree":3},
+{"languages":["Vietnamese"],"count":4,"degree":1},
+{"languages":["English","ASL","Other"],"count":4,"degree":3},
+{"languages":["English","Spanish","Other"],"count":3,"degree":3},
+{"languages":["Spanish","ASL","Other"],"count":3,"degree":3},
+{"languages":["English","Hmong"],"count":2,"degree":2},
+{"languages":["ASL","Home signs/gestures"],"count":2,"degree":2},
+{"languages":["ASL","Other"],"count":2,"degree":2},
+{"languages":["English","ASL","Tagalog/Pilipino"],"count":2,"degree":3},
+{"languages":["English","Home signs/gestures","Other"],"count":2,"degree":3},
+{"languages":["Tagalog/Pilipino"],"count":1,"degree":1},
+{"languages":["English","ASL","Vietnamese"],"count":1,"degree":3},
+{"languages":["English","Home signs/gestures","Vietnamese"],"count":1,"degree":3},
+{"languages":["English","Cantonese","Other"],"count":1,"degree":3},
+{"languages":["English","Vietnamese","Tagalog/Pilipino"],"count":1,"degree":3},
+{"languages":["English","Vietnamese","Other"],"count":1,"degree":3},
+{"languages":["Spanish","Home signs/gestures","Other"],"count":1,"degree":3},
+{"languages":["English","Spanish","ASL","Other"],"count":1,"degree":4},
+{"languages":["English","ASL","Home signs/gestures","Vietnamese"],"count":1,"degree":4},
+{"languages":["English","ASL","Home signs/gestures","Tagalog/Pilipino"],"count":1,"degree":4},
+{"languages":["English","ASL","Home signs/gestures","Hmong"],"count":1,"degree":4}],
+"otherLanguagesBreakout":[{"language":"Mandarin","count":15},{"language":"Mixteco","count":12},{"language":"Russian","count":7},{"language":"Arabic","count":6},{"language":"Korean","count":5},{"language":"Urdu","count":5},{"language":"Japanese","count":4},{"language":"Farsi","count":3},{"language":"Haitian Creole","count":3},{"language":"Portuguese","count":3},{"language":"Dari","count":2},{"language":"Hindi","count":2},{"language":"Mam","count":2},{"language":"Marathi","count":2},{"language":"Persian","count":2},{"language":"Punjabi","count":2},{"language":"Unspecified Other","count":2},{"language":"Amharic","count":1},{"language":"Amuzgo","count":1},{"language":"Armenian","count":1},{"language":"Asian Indian","count":1},{"language":"Burmese","count":1},{"language":"Cambodian","count":1},{"language":"Chaldean","count":1},{"language":"Chinese","count":1},{"language":"Creole","count":1},{"language":"Dari, Pashto","count":1},{"language":"Deaf/Blind","count":1},{"language":"French","count":1},{"language":"Hebrew","count":1},{"language":"Hungarian","count":1},{"language":"Korean, Shanghainese","count":1},{"language":"Lao, Chinese","count":1},{"language":"Mandarin and English","count":1},{"language":"Mexican Sign Language (LSM)","count":1},{"language":"Mixteco/Spanish","count":1},{"language":"Nepali","count":1},{"language":"Pampanga,English","count":1},{"language":"Pashto","count":1},{"language":"Thai","count":1},{"language":"Triqui","count":1},{"language":"Ukrainian","count":1},{"language":"Zapateco","count":1}]};
+
+const DEG_FILL = {1:'var(--teal-light)',2:'var(--teal-mid)',3:'var(--teal)',4:'var(--teal-deep)'};
+const degFill = d => DEG_FILL[Math.min(d,4)];
+const degWord = d => d===1?'one language':d===2?'two languages':d===3?'three languages':'four languages';
+const fmt = n => n.toLocaleString('en-US');
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+
+const multilingual = DATA.intersections.filter(i => i.degree > 1).reduce((s,i)=>s+i.count,0);
+const pctMulti = Math.round(100 * multilingual / DATA.recordsWithLanguage);
+
+document.getElementById('lede').innerHTML =
+  `<strong>${fmt(DATA.recordsWithLanguage)}</strong> children with home language data, drawn from <strong>${fmt(DATA.totalRecords)}</strong> unduplicated children assessed statewide. They report <strong>${DATA.uniqueCombinations}</strong> distinct combinations across <strong>${DATA.uniqueLanguages}</strong> language categories, and <strong>${pctMulti}%</strong> live in homes with more than one language.`;
+
+document.getElementById('missing-note').textContent =
+  `${DATA.missingLanguage} of ${fmt(DATA.totalRecords)} children (${(100*DATA.missingLanguage/DATA.totalRecords).toFixed(1)}%) had no home language reported and are not shown in the plot.`;
+
+// Other breakout
+const otherTotal = DATA.otherLanguagesBreakout.reduce((s,o)=>s+o.count,0);
+document.getElementById('other-sub').textContent = `${otherTotal} children were coded "Other." The specific languages written in:`;
+const ol = document.getElementById('otherlist');
+const maxOther = DATA.otherLanguagesBreakout[0].count;
+DATA.otherLanguagesBreakout.forEach(o => {
+  const li = document.createElement('li');
+  li.innerHTML = `<span class="${o.language==='Unspecified Other'?'unspec':''}">${o.language}</span><span class="n">${o.count}</span><span class="meter"><i style="width:${100*o.count/maxOther}%"></i></span>`;
+  ol.appendChild(li);
+});
+
+// Stats
+document.getElementById('stats').innerHTML = [
+  [fmt(DATA.totalRecords), 'Children'],
+  [DATA.uniqueLanguages, 'Language categories'],
+  [DATA.uniqueCombinations, 'Combinations'],
+  [pctMulti + '%', 'Multilingual homes']
+].map(([b,s]) => `<div class="stat"><b>${b}</b><span>${s}</span></div>`).join('');
+
+// Table
+const tbody = document.querySelector('#combo-table tbody');
+DATA.intersections.forEach(ix => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${ix.languages.join(' + ')}</td><td class="num">${ix.degree}</td><td class="num">${ix.count}</td><td class="num">${(100*ix.count/DATA.recordsWithLanguage).toFixed(1)}%</td>`;
+  tbody.appendChild(tr);
+});
+
+// Chart
+let sortMode = 'size';
+const tip = document.getElementById('tip');
+function showTip(e, html) { tip.innerHTML = html; tip.hidden = false; moveTip(e); }
+function moveTip(e) { if (tip.hidden) return; const x = e.clientX + 16, y = e.clientY - 12; tip.style.left = Math.min(x, window.innerWidth - 340) + 'px'; tip.style.top = y + 'px'; }
+function hideTip() { tip.hidden = true; }
+document.addEventListener('mousemove', moveTip);
+
+function render() {
+  const wrap = document.getElementById('chart');
+  wrap.innerHTML = '';
+  const ints = [...DATA.intersections];
+  if (sortMode === 'size') ints.sort((a,b)=>b.count-a.count);
+  else ints.sort((a,b)=>a.degree-b.degree || b.count-a.count);
+
+  const langs = DATA.languages;
+  const maxSet = DATA.setSizes[0].count;
+  const maxInt = Math.max(...ints.map(i=>i.count));
+
+  const LABEL_W = 200, SET_W = 210, GAP = 16, COL_W = 32, ROW_H = 30, BAR_H = 210, PAD_TOP = 26, DOT_R = 8;
+  const NC = ints.length, NR = langs.length;
+  const MW = NC * COL_W, MH = NR * ROW_H;
+  const W = LABEL_W + SET_W + GAP + MW + 16;
+  const H = PAD_TOP + BAR_H + GAP + MH + 34;
+  const MX = LABEL_W + SET_W + GAP, MY = PAD_TOP + BAR_H + GAP;
+
+  const svg = el('svg', {width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-labelledby': 'svg-title'}, wrap);
+  const t = el('title', {id: 'svg-title'}, svg);
+  t.textContent = `UpSet plot of ${DATA.uniqueCombinations} home language combinations among ${fmt(DATA.recordsWithLanguage)} deaf and hard of hearing children. Full data in the table view.`;
+
+  // Row stripes across set bars and matrix
+  langs.forEach((l, ri) => { if (ri % 2 === 0) el('rect', {class:'stripe', x: LABEL_W, y: MY + ri*ROW_H, width: SET_W + GAP + MW, height: ROW_H}, svg); });
+
+  // Top bar axis
+  const gTop = el('g', {transform: `translate(${MX},${PAD_TOP})`}, svg);
+  const scaleY = v => BAR_H - (v / maxInt) * (BAR_H - 24);
+  const ticks = niceTicks(maxInt);
+  ticks.forEach(v => {
+    const y = scaleY(v);
+    el('line', {class:'grid-line', x1: 0, y1: y, x2: MW, y2: y}, gTop);
+    const tx = el('text', {class:'lbl-tick', x: -8, y: y + 5, 'text-anchor': 'end'}, gTop); tx.textContent = v;
+  });
+  el('line', {class:'axis-line', x1: 0, y1: BAR_H, x2: MW, y2: BAR_H}, gTop);
+  const at = el('text', {class:'lbl-axis', x: 0, y: -8, 'text-anchor':'start'}, gTop); at.textContent = 'Children with this exact combination';
+
+  // Set bars (left)
+  const rows = [];
+  DATA.setSizes.forEach((s, ri) => {
+    const g = el('g', {class:'row', transform:`translate(0,${MY + ri*ROW_H})`}, svg);
+    const bw = (s.count / maxSet) * (SET_W - 60);
+    const lab = el('text', {class:'lbl-lang', x: LABEL_W - 10, y: ROW_H/2 + 5, 'text-anchor':'end'}, g); lab.textContent = s.language;
+    el('rect', {class:'setbar', x: LABEL_W + SET_W - bw, y: (ROW_H-18)/2, width: bw, height: 18, rx: 0}, g);
+    const v = el('text', {class:'lbl-val', x: LABEL_W + SET_W - bw - 6, y: ROW_H/2 + 5, 'text-anchor':'end'}, g); v.textContent = fmt(s.count);
+    el('rect', {x: 0, y: 0, width: LABEL_W + SET_W, height: ROW_H, fill: 'transparent'}, g);
+    g.addEventListener('mouseenter', e => { highlightLang(s.language); showTip(e, `<div class="t1">${s.language}</div><div class="t2">${fmt(s.count)} children</div><div class="t3">${(100*s.count/DATA.recordsWithLanguage).toFixed(1)}% of children with language data, in any combination</div>`); });
+    g.addEventListener('mouseleave', () => { clear(); hideTip(); });
+    rows.push(g);
+  });
+  const sl = el('text', {class:'lbl-axis', x: LABEL_W + SET_W/2, y: MY + MH + 24, 'text-anchor':'middle'}, svg); sl.textContent = 'Children using each language, any combination';
+
+  // Columns: bar + dots
+  const cols = [];
+  ints.forEach((ix, ci) => {
+    const g = el('g', {class:'col', tabindex: 0, role:'group', 'aria-label': `${ix.languages.join(' plus ')}: ${ix.count} children`}, svg);
+    const x0 = MX + ci*COL_W;
+    el('rect', {class:'hit', x: x0, y: PAD_TOP, width: COL_W, height: BAR_H + GAP + MH}, g);
+    const bh = BAR_H - scaleY(ix.count);
+    el('rect', {class:'bar', x: x0 + 5, y: PAD_TOP + BAR_H - bh, width: COL_W - 10, height: bh, fill: degFill(ix.degree)}, g);
+    const vl = el('text', {class:'lbl-val', x: x0 + COL_W/2, y: PAD_TOP + BAR_H - bh - 5, 'text-anchor':'middle'}, g);
+    vl.textContent = ix.count;
+    const active = ix.languages.map(l => langs.indexOf(l)).sort((a,b)=>a-b);
+    const cx = x0 + COL_W/2;
+    if (active.length > 1) el('line', {class:'link', x1: cx, y1: MY + active[0]*ROW_H + ROW_H/2, x2: cx, y2: MY + active[active.length-1]*ROW_H + ROW_H/2}, g);
+    langs.forEach((l, ri) => {
+      const on = ix.languages.includes(l);
+      el('circle', {class: on ? 'dot-on' : 'dot-off', cx, cy: MY + ri*ROW_H + ROW_H/2, r: on ? DOT_R : 4}, g);
+    });
+    const tipHtml = `<div class="t1">${ix.languages.join(' + ')}</div><div class="t2">${fmt(ix.count)} children</div><div class="t3">${(100*ix.count/DATA.recordsWithLanguage).toFixed(1)}% of children with language data · ${degWord(ix.degree)}</div>`;
+    g.addEventListener('mouseenter', e => { highlightCol(ci, ix); showTip(e, tipHtml); });
+    g.addEventListener('mouseleave', () => { clear(); hideTip(); });
+    g.addEventListener('focus', () => { highlightCol(ci, ix); const r = g.getBoundingClientRect(); showTip({clientX: r.left + COL_W/2, clientY: r.top + 40}, tipHtml); });
+    g.addEventListener('blur', () => { clear(); hideTip(); });
+    cols.push(g);
+  });
+
+  function highlightCol(ci, ix) {
+    cols.forEach((c, i) => c.classList.toggle('hi', i===ci) || c.classList.toggle('dim', i!==ci));
+    rows.forEach((r, i) => { const on = ix.languages.includes(langs[i]); r.classList.toggle('hi', on); r.classList.toggle('dim', !on); });
+  }
+  function highlightLang(lang) {
+    cols.forEach((c, i) => { const on = ints[i].languages.includes(lang); c.classList.toggle('dim', !on); c.classList.remove('hi'); });
+    rows.forEach((r, i) => { const on = langs[i] === lang; r.classList.toggle('hi', on); r.classList.toggle('dim', !on); });
+  }
+  function clear() { cols.forEach(c => c.classList.remove('hi','dim')); rows.forEach(r => r.classList.remove('hi','dim')); }
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+function niceTicks(max) {
+  const step = max > 250 ? 100 : max > 120 ? 50 : 25;
+  const out = []; for (let v = step; v <= max; v += step) out.push(v); return out;
+}
+
+document.getElementById('sort-size').addEventListener('click', () => setSort('size'));
+document.getElementById('sort-degree').addEventListener('click', () => setSort('degree'));
+function setSort(m) { sortMode = m; document.getElementById('sort-size').setAttribute('aria-pressed', m==='size'); document.getElementById('sort-degree').setAttribute('aria-pressed', m==='degree'); render(); }
+
+const howtoBtn = document.getElementById('howto-btn'), howto = document.getElementById('howto');
+howtoBtn.addEventListener('click', () => { howto.hidden = !howto.hidden; howtoBtn.setAttribute('aria-expanded', String(!howto.hidden)); });
+const tableBtn = document.getElementById('table-btn'), tablewrap = document.getElementById('tablewrap');
+tableBtn.addEventListener('click', () => { tablewrap.hidden = !tablewrap.hidden; tableBtn.setAttribute('aria-expanded', String(!tablewrap.hidden)); tableBtn.textContent = tablewrap.hidden ? 'Show as table' : 'Hide table'; });
+
+render();
 </script>
-</body>
-</html>
+</body></html>
