@@ -205,7 +205,7 @@
   <div class="howto" id="howto" hidden>
     <p>This is an UpSet plot. It shows every combination of home languages reported for a child, which a Venn diagram cannot do once there are more than three languages.</p>
     <dl>
-      <dt>Horizontal bars (left)</dt><dd>Total children who use each language in any combination. English 762 means 762 children have English as one of their home languages, alone or with others.</dd>
+      <dt>Horizontal bars (left)</dt><dd>Total children who use each language in any combination. English 764 means 764 children have English as one of their home languages, alone or with others.</dd>
       <dt>Vertical bars (top)</dt><dd>Children with that exact combination. Each column is one specific set of languages.</dd>
       <dt>Dot matrix</dt><dd>Filled dots show which languages make up each column. A line joins the dots of a multilingual combination; a single dot is a one-language home.</dd>
       <dt>Shading</dt><dd>Lighter bars are one-language homes; darker bars have more languages. The dots carry the same information, so shading is never the only cue.</dd>
@@ -224,6 +224,7 @@
       <div class="panel note">
         <p><strong>Missing data.</strong> <span id="missing-note"></span></p>
         <p><strong>Who is counted.</strong> Each child appears once, using their most recent assessment. Children assessed in both fall and spring contribute their spring record.</p>
+        <p><strong>Mandarin and Mixteco.</strong> These were written in under "Other" on the form. They are shown as named languages because each was reported by more than ten children; the remaining write-ins stay in Other.</p>
       </div>
       <div class="panel">
         <h2>At a glance</h2>
@@ -248,51 +249,7 @@
 <div class="tip" id="tip" hidden role="status" aria-live="polite"></div>
 
 <script>
-const DATA = {"totalRecords":1079,"recordsWithLanguage":1041,"missingLanguage":38,"uniqueLanguages":9,"uniqueCombinations":40,
-"languages":["English","Spanish","ASL","Other","Home signs/gestures","Vietnamese","Cantonese","Tagalog/Pilipino","Hmong"],
-"setSizes":[{"language":"English","count":762},{"language":"Spanish","count":431},{"language":"ASL","count":246},{"language":"Other","count":103},{"language":"Home signs/gestures","count":86},{"language":"Vietnamese","count":18},{"language":"Cantonese","count":17},{"language":"Tagalog/Pilipino","count":13},{"language":"Hmong","count":3}],
-"intersections":[
-{"languages":["English"],"count":324,"degree":1},
-{"languages":["English","Spanish"],"count":156,"degree":2},
-{"languages":["Spanish"],"count":141,"degree":1},
-{"languages":["English","ASL"],"count":85,"degree":2},
-{"languages":["English","Spanish","ASL"],"count":57,"degree":3},
-{"languages":["Other"],"count":42,"degree":1},
-{"languages":["ASL"],"count":32,"degree":1},
-{"languages":["English","Other"],"count":30,"degree":2},
-{"languages":["English","ASL","Home signs/gestures"],"count":22,"degree":3},
-{"languages":["Spanish","ASL"],"count":16,"degree":2},
-{"languages":["English","Home signs/gestures"],"count":15,"degree":2},
-{"languages":["Spanish","Other"],"count":13,"degree":2},
-{"languages":["English","Spanish","Home signs/gestures"],"count":13,"degree":3},
-{"languages":["Spanish","Home signs/gestures"],"count":11,"degree":2},
-{"languages":["English","Spanish","ASL","Home signs/gestures"],"count":11,"degree":4},
-{"languages":["English","Cantonese"],"count":10,"degree":2},
-{"languages":["English","Vietnamese"],"count":9,"degree":2},
-{"languages":["English","Tagalog/Pilipino"],"count":8,"degree":2},
-{"languages":["Cantonese"],"count":6,"degree":1},
-{"languages":["Spanish","ASL","Home signs/gestures"],"count":5,"degree":3},
-{"languages":["Vietnamese"],"count":4,"degree":1},
-{"languages":["English","ASL","Other"],"count":4,"degree":3},
-{"languages":["English","Spanish","Other"],"count":3,"degree":3},
-{"languages":["Spanish","ASL","Other"],"count":3,"degree":3},
-{"languages":["English","Hmong"],"count":2,"degree":2},
-{"languages":["ASL","Home signs/gestures"],"count":2,"degree":2},
-{"languages":["ASL","Other"],"count":2,"degree":2},
-{"languages":["English","ASL","Tagalog/Pilipino"],"count":2,"degree":3},
-{"languages":["English","Home signs/gestures","Other"],"count":2,"degree":3},
-{"languages":["Tagalog/Pilipino"],"count":1,"degree":1},
-{"languages":["English","ASL","Vietnamese"],"count":1,"degree":3},
-{"languages":["English","Home signs/gestures","Vietnamese"],"count":1,"degree":3},
-{"languages":["English","Cantonese","Other"],"count":1,"degree":3},
-{"languages":["English","Vietnamese","Tagalog/Pilipino"],"count":1,"degree":3},
-{"languages":["English","Vietnamese","Other"],"count":1,"degree":3},
-{"languages":["Spanish","Home signs/gestures","Other"],"count":1,"degree":3},
-{"languages":["English","Spanish","ASL","Other"],"count":1,"degree":4},
-{"languages":["English","ASL","Home signs/gestures","Vietnamese"],"count":1,"degree":4},
-{"languages":["English","ASL","Home signs/gestures","Tagalog/Pilipino"],"count":1,"degree":4},
-{"languages":["English","ASL","Home signs/gestures","Hmong"],"count":1,"degree":4}],
-"otherLanguagesBreakout":[{"language":"Mandarin","count":15},{"language":"Mixteco","count":12},{"language":"Russian","count":7},{"language":"Arabic","count":6},{"language":"Korean","count":5},{"language":"Urdu","count":5},{"language":"Japanese","count":4},{"language":"Farsi","count":3},{"language":"Haitian Creole","count":3},{"language":"Portuguese","count":3},{"language":"Dari","count":2},{"language":"Hindi","count":2},{"language":"Mam","count":2},{"language":"Marathi","count":2},{"language":"Persian","count":2},{"language":"Punjabi","count":2},{"language":"Unspecified Other","count":2},{"language":"Amharic","count":1},{"language":"Amuzgo","count":1},{"language":"Armenian","count":1},{"language":"Asian Indian","count":1},{"language":"Burmese","count":1},{"language":"Cambodian","count":1},{"language":"Chaldean","count":1},{"language":"Chinese","count":1},{"language":"Creole","count":1},{"language":"Dari, Pashto","count":1},{"language":"Deaf/Blind","count":1},{"language":"French","count":1},{"language":"Hebrew","count":1},{"language":"Hungarian","count":1},{"language":"Korean, Shanghainese","count":1},{"language":"Lao, Chinese","count":1},{"language":"Mandarin and English","count":1},{"language":"Mexican Sign Language (LSM)","count":1},{"language":"Mixteco/Spanish","count":1},{"language":"Nepali","count":1},{"language":"Pampanga,English","count":1},{"language":"Pashto","count":1},{"language":"Thai","count":1},{"language":"Triqui","count":1},{"language":"Ukrainian","count":1},{"language":"Zapateco","count":1}]};
+const DATA = {"totalRecords":1079,"recordsWithLanguage":1041,"missingLanguage":38,"uniqueLanguages":11,"uniqueCombinations":44,"languages":["English","Spanish","ASL","Home signs/gestures","Other","Vietnamese","Cantonese","Mandarin","Tagalog/Pilipino","Mixteco","Hmong"],"setSizes":[{"language":"English","count":764},{"language":"Spanish","count":432},{"language":"ASL","count":246},{"language":"Home signs/gestures","count":86},{"language":"Other","count":74},{"language":"Vietnamese","count":18},{"language":"Cantonese","count":17},{"language":"Mandarin","count":16},{"language":"Tagalog/Pilipino","count":13},{"language":"Mixteco","count":13},{"language":"Hmong","count":3}],"intersections":[{"languages":["English"],"count":324,"degree":1},{"languages":["English","Spanish"],"count":156,"degree":2},{"languages":["Spanish"],"count":141,"degree":1},{"languages":["English","ASL"],"count":85,"degree":2},{"languages":["English","Spanish","ASL"],"count":57,"degree":3},{"languages":["ASL"],"count":32,"degree":1},{"languages":["Other"],"count":27,"degree":1},{"languages":["English","Other"],"count":26,"degree":2},{"languages":["English","ASL","Home signs/gestures"],"count":22,"degree":3},{"languages":["Spanish","ASL"],"count":16,"degree":2},{"languages":["English","Home signs/gestures"],"count":15,"degree":2},{"languages":["English","Spanish","Home signs/gestures"],"count":13,"degree":3},{"languages":["Spanish","Home signs/gestures"],"count":11,"degree":2},{"languages":["Spanish","Mixteco"],"count":11,"degree":2},{"languages":["English","Spanish","ASL","Home signs/gestures"],"count":11,"degree":4},{"languages":["Mandarin"],"count":10,"degree":1},{"languages":["English","Cantonese"],"count":10,"degree":2},{"languages":["English","Vietnamese"],"count":9,"degree":2},{"languages":["English","Tagalog/Pilipino"],"count":8,"degree":2},{"languages":["Cantonese"],"count":6,"degree":1},{"languages":["English","Mandarin"],"count":6,"degree":2},{"languages":["Spanish","ASL","Home signs/gestures"],"count":5,"degree":3},{"languages":["Vietnamese"],"count":4,"degree":1},{"languages":["English","ASL","Other"],"count":4,"degree":3},{"languages":["Spanish","Other"],"count":3,"degree":2},{"languages":["English","Spanish","Other"],"count":3,"degree":3},{"languages":["Spanish","ASL","Other"],"count":3,"degree":3},{"languages":["Mixteco"],"count":2,"degree":1},{"languages":["English","Hmong"],"count":2,"degree":2},{"languages":["ASL","Home signs/gestures"],"count":2,"degree":2},{"languages":["ASL","Other"],"count":2,"degree":2},{"languages":["English","ASL","Tagalog/Pilipino"],"count":2,"degree":3},{"languages":["English","Home signs/gestures","Other"],"count":2,"degree":3},{"languages":["Tagalog/Pilipino"],"count":1,"degree":1},{"languages":["English","ASL","Vietnamese"],"count":1,"degree":3},{"languages":["English","Home signs/gestures","Vietnamese"],"count":1,"degree":3},{"languages":["English","Cantonese","Other"],"count":1,"degree":3},{"languages":["English","Vietnamese","Tagalog/Pilipino"],"count":1,"degree":3},{"languages":["English","Vietnamese","Other"],"count":1,"degree":3},{"languages":["Spanish","Home signs/gestures","Other"],"count":1,"degree":3},{"languages":["English","Spanish","ASL","Other"],"count":1,"degree":4},{"languages":["English","ASL","Home signs/gestures","Vietnamese"],"count":1,"degree":4},{"languages":["English","ASL","Home signs/gestures","Tagalog/Pilipino"],"count":1,"degree":4},{"languages":["English","ASL","Home signs/gestures","Hmong"],"count":1,"degree":4}],"otherLanguagesBreakout":[{"language":"Russian","count":7},{"language":"Arabic","count":6},{"language":"Korean","count":5},{"language":"Urdu","count":5},{"language":"Japanese","count":4},{"language":"Farsi","count":3},{"language":"Haitian Creole","count":3},{"language":"Portuguese","count":3},{"language":"Dari","count":2},{"language":"Hindi","count":2},{"language":"Mam","count":2},{"language":"Marathi","count":2},{"language":"Persian","count":2},{"language":"Punjabi","count":2},{"language":"Unspecified Other","count":2},{"language":"Amharic","count":1},{"language":"Amuzgo","count":1},{"language":"Armenian","count":1},{"language":"Asian Indian","count":1},{"language":"Burmese","count":1},{"language":"Cambodian","count":1},{"language":"Chaldean","count":1},{"language":"Chinese","count":1},{"language":"Creole","count":1},{"language":"Dari, Pashto","count":1},{"language":"Deaf/Blind","count":1},{"language":"French","count":1},{"language":"Hebrew","count":1},{"language":"Hungarian","count":1},{"language":"Korean, Shanghainese","count":1},{"language":"Lao, Chinese","count":1},{"language":"Mexican Sign Language (LSM)","count":1},{"language":"Nepali","count":1},{"language":"Pampanga,English","count":1},{"language":"Pashto","count":1},{"language":"Thai","count":1},{"language":"Triqui","count":1},{"language":"Ukrainian","count":1},{"language":"Zapateco","count":1}]};
 
 const DEG_FILL = {1:'var(--teal-light)',2:'var(--teal-mid)',3:'var(--teal)',4:'var(--teal-deep)'};
 const degFill = d => DEG_FILL[Math.min(d,4)];
